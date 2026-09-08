@@ -49,8 +49,8 @@ type DiscountTicket = {
 
 type Cart = Record<string, number>;
 
-const ART_DIRECTION = "/manus-storage/supermercado-art-direction_c0308afd.png";
-const STICKERS = "/manus-storage/supermercado-grocery-stickers_3fd9fb45.png";
+const ART_DIRECTION = "/supermercado-art-direction.jpg";
+const STICKERS = "/supermercado-grocery-stickers.jpg";
 
 const products: Product[] = [
   { id: "queso", name: "Queso campesino", category: "Lácteos", price: 8000, color: "blue", emoji: "🧀", accent: "#f7c34a" },
