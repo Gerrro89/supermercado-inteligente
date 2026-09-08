@@ -33,10 +33,17 @@ type Product = {
   name: string;
   category: string;
   price: number;
-  discount: number;
-  fraction: string;
   color: string;
   emoji: string;
+  accent: string;
+};
+
+type DiscountTicket = {
+  id: string;
+  label: string;
+  percent: number;
+  kind: "percentage" | "fraction";
+  detail: string;
   accent: string;
 };
 
@@ -46,15 +53,22 @@ const ART_DIRECTION = "/manus-storage/supermercado-art-direction_c0308afd.png";
 const STICKERS = "/manus-storage/supermercado-grocery-stickers_3fd9fb45.png";
 
 const products: Product[] = [
-  { id: "queso", name: "Queso campesino", category: "Lácteos", price: 8000, discount: 25, fraction: "1/4", color: "blue", emoji: "🧀", accent: "#f7c34a" },
-  { id: "leche", name: "Leche entera", category: "Lácteos", price: 4500, discount: 10, fraction: "1/10", color: "sky", emoji: "🥛", accent: "#6cc4de" },
-  { id: "manzanas", name: "Manzanas rojas", category: "Frutas", price: 6000, discount: 20, fraction: "1/5", color: "red", emoji: "🍎", accent: "#ef5947" },
-  { id: "cereal", name: "Cereal de colores", category: "Despensa", price: 9500, discount: 20, fraction: "1/5", color: "orange", emoji: "🥣", accent: "#ef9b3e" },
-  { id: "jugo", name: "Jugo de naranja", category: "Bebidas", price: 5000, discount: 25, fraction: "1/4", color: "lime", emoji: "🍊", accent: "#9fc437" },
-  { id: "pan", name: "Pan artesanal", category: "Panadería", price: 3500, discount: 0, fraction: "0", color: "yellow", emoji: "🥖", accent: "#df9a3b" },
+  { id: "queso", name: "Queso campesino", category: "Lácteos", price: 8000, color: "blue", emoji: "🧀", accent: "#f7c34a" },
+  { id: "leche", name: "Leche entera", category: "Lácteos", price: 4500, color: "sky", emoji: "🥛", accent: "#6cc4de" },
+  { id: "manzanas", name: "Manzanas rojas", category: "Frutas", price: 6000, color: "red", emoji: "🍎", accent: "#ef5947" },
+  { id: "cereal", name: "Cereal de colores", category: "Despensa", price: 9500, color: "orange", emoji: "🥣", accent: "#ef9b3e" },
+  { id: "jugo", name: "Jugo de naranja", category: "Bebidas", price: 5000, color: "lime", emoji: "🍊", accent: "#9fc437" },
+  { id: "pan", name: "Pan artesanal", category: "Panadería", price: 3500, color: "yellow", emoji: "🥖", accent: "#df9a3b" },
 ];
 
-const money = (value: number) => `$${value.toLocaleString("es-CO")}`;
+const discountTickets: DiscountTicket[] = [
+  { id: "pct25", label: "25%", percent: 25, kind: "percentage", detail: "una cuarta parte", accent: "#e55334" },
+  { id: "frac14", label: "1/4", percent: 25, kind: "fraction", detail: "25% de descuento", accent: "#1e4b9a" },
+  { id: "pct10", label: "10%", percent: 10, kind: "percentage", detail: "una décima parte", accent: "#6caec0" },
+  { id: "frac15", label: "1/5", percent: 20, kind: "fraction", detail: "20% de descuento", accent: "#8aa82e" },
+];
+
+const money = (value: number) => `$${Math.round(value).toLocaleString("es-CO")}`;
 const percentDecimal = (percent: number) => (percent / 100).toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function getProduct(id: string) {
@@ -173,44 +187,56 @@ function Exploration({ onContinue }: { onContinue: () => void }) {
   );
 }
 
-function ProductCard({ product, quantity, onAdd }: { product: Product; quantity: number; onAdd: () => void }) {
-  return <article className={`product-card product-${product.color}`}>
-    <div className="product-card-top"><span className="category-label">{product.category}</span>{product.discount > 0 && <span className="discount-pill">-{product.discount}%</span>}</div>
+function ProductCard({ product, quantity, appliedTicket, selectedTicket, onAdd, onDrop, onApplySelected }: { product: Product; quantity: number; appliedTicket?: DiscountTicket; selectedTicket?: DiscountTicket; onAdd: () => void; onDrop: (ticketId: string) => void; onApplySelected: () => void }) {
+  const discountedPrice = product.price * (1 - (appliedTicket?.percent ?? 0) / 100);
+  return <article className={`product-card product-${product.color} ${appliedTicket ? "has-ticket" : "drop-ready"}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); const ticketId = event.dataTransfer.getData("ticketId"); if (ticketId) onDrop(ticketId); }}>
+    <div className="product-card-top"><span className="category-label">{product.category}</span>{appliedTicket ? <span className="discount-pill applied"><Check size={11} /> {appliedTicket.label}</span> : <span className="drop-hint"><Tags size={10} /> suelta aquí</span>}</div>
     <div className="product-emoji" style={{ background: `linear-gradient(145deg, ${product.accent}33, ${product.accent}88)` }}>{product.emoji}</div>
     <h3>{product.name}</h3>
-    <div className="product-price-row"><div><span className="product-price">{money(product.price * (1 - product.discount / 100))}</span><span className="product-before">{product.discount ? money(product.price) : "Precio justo"}</span></div><button className="add-button" onClick={onAdd} aria-label={`Agregar ${product.name}`}><Plus size={17} />{quantity > 0 && <b>{quantity}</b>}</button></div>
-    <div className="product-equivalence">{product.discount ? <><BadgePercent size={12} /> {product.discount}% = {product.fraction} = {percentDecimal(product.discount)}</> : <><Tags size={12} /> Sin descuento</>}</div>
+    <div className="product-price-row"><div><span className="product-price">{money(discountedPrice)}</span><span className="product-before">{appliedTicket ? `${money(product.price)} sin descuento` : "Precio base"}</span></div><button className="add-button" onClick={onAdd} aria-label={`Agregar ${product.name}`}><Plus size={17} />{quantity > 0 && <b>{quantity}</b>}</button></div>
+    <div className="product-equivalence">{appliedTicket ? <><BadgePercent size={12} /> {appliedTicket.label} = {appliedTicket.detail}</> : <><CircleHelp size={12} /> Arrastra un ticket aquí</>}</div>
+    {selectedTicket && !appliedTicket && <button className="apply-selected" onClick={onApplySelected}>Usar {selectedTicket.label} aquí <ArrowRight size={12} /></button>}
   </article>;
 }
-
 function Challenge({ cart, setCart, onCheckout }: { cart: Cart; setCart: React.Dispatch<React.SetStateAction<Cart>>; onCheckout: () => void }) {
   const budget = 30000;
+  const [assignedTickets, setAssignedTickets] = useState<Record<string, string>>({});
+  const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
   const cartItems = Object.entries(cart).filter(([, quantity]) => quantity > 0);
+  const usedTicketIds = Object.values(assignedTickets);
   const stats = useMemo(() => {
     const base = cartItems.reduce((sum, [id, quantity]) => sum + getProduct(id).price * quantity, 0);
-    const total = cartItems.reduce((sum, [id, quantity]) => sum + getProduct(id).price * (1 - getProduct(id).discount / 100) * quantity, 0);
+    const total = cartItems.reduce((sum, [id, quantity]) => { const ticket = discountTickets.find((item) => item.id === assignedTickets[id]); return sum + getProduct(id).price * (1 - (ticket?.percent ?? 0) / 100) * quantity; }, 0);
     return { base, total, savings: base - total, count: cartItems.reduce((sum, [, quantity]) => sum + quantity, 0) };
-  }, [cartItems]);
+  }, [cartItems, assignedTickets]);
   const addProduct = (id: string) => setCart((current) => ({ ...current, [id]: (current[id] ?? 0) + 1 }));
   const removeProduct = (id: string) => setCart((current) => ({ ...current, [id]: Math.max((current[id] ?? 0) - 1, 0) }));
+  const assignTicket = (productId: string, ticketId: string) => {
+    if (usedTicketIds.includes(ticketId) && assignedTickets[productId] !== ticketId) return;
+    setAssignedTickets((current) => ({ ...current, [productId]: ticketId }));
+    setSelectedTicket(null);
+  };
+  const removeTicket = (productId: string) => setAssignedTickets((current) => { const next = { ...current }; delete next[productId]; return next; });
   const remaining = budget - stats.total;
   const ready = stats.count >= 3 && remaining >= 0;
   return <section className="phase-shell fade-in challenge-shell">
-    <div className="phase-heading challenge-heading"><div><Badge tone="blue"><ShoppingBasket size={13} /> Fase 02 · Reto de compra</Badge><h2>Llena tu canasta <em>con estrategia.</em></h2><p>Tienes un saldo limitado. Elige al menos 3 productos, encuentra descuentos equivalentes y cuida el cambio.</p></div><div className="budget-chip"><WalletCards size={17} /><div><small>Saldo de la pareja</small><strong>{money(budget)}</strong></div></div></div>
+    <div className="phase-heading challenge-heading"><div><Badge tone="blue"><ShoppingBasket size={13} /> Fase 02 · Reto de compra</Badge><h2>Elige el producto, <em>elige el descuento.</em></h2><p>Arrastra un ticket de porcentaje o fracción y suéltalo sobre un producto. Cada ticket se puede usar una sola vez.</p></div><div className="budget-chip"><WalletCards size={17} /><div><small>Saldo de la pareja</small><strong>{money(budget)}</strong></div></div></div>
+    <div className="ticket-tray"><div className="ticket-tray-title"><Tags size={16} /><div><strong>Tickets disponibles</strong><span>Arrastra para activar una oferta</span></div></div><div className="ticket-list">{discountTickets.map((ticket) => { const used = usedTicketIds.includes(ticket.id); return <button key={ticket.id} className={`discount-ticket ticket-${ticket.kind} ${used ? "used" : ""} ${selectedTicket === ticket.id ? "selected" : ""}`} draggable={!used} onDragStart={(event) => { event.dataTransfer.setData("ticketId", ticket.id); event.dataTransfer.effectAllowed = "move"; }} onClick={() => !used && setSelectedTicket(selectedTicket === ticket.id ? null : ticket.id)} disabled={used} style={{ "--ticket-accent": ticket.accent } as React.CSSProperties}><span className="ticket-perforation" /><span className="ticket-main"><b>{ticket.label}</b><small>{ticket.kind === "fraction" ? "fracción" : "porcentaje"}</small></span><span className="ticket-copy">{ticket.detail}</span>{used ? <span className="ticket-used"><Check size={12} /> usado</span> : <span className="ticket-grab">↕</span>}</button>; })}</div><div className="ticket-helper"><Hand size={13} /> También puedes seleccionar un ticket y pulsar “Usar aquí” en el producto.</div></div>
     <div className="challenge-layout">
-      <div className="aisle-panel"><div className="aisle-toolbar"><div><span className="tiny-label">Pasillo matemático</span><strong>Elige tus productos</strong></div><div className="aisle-art"><img src={STICKERS} alt="Stickers ilustrados de alimentos" /></div></div><div className="product-grid">{products.map((product) => <ProductCard key={product.id} product={product} quantity={cart[product.id] ?? 0} onAdd={() => addProduct(product.id)} />)}</div></div>
-      <aside className="receipt-panel"><div className="receipt-head"><div className="receipt-title"><div className="receipt-icon"><ShoppingBasket size={17} /></div><div><strong>Tu canasta</strong><span>{stats.count} {stats.count === 1 ? "producto" : "productos"}</span></div></div><Badge tone={stats.savings > 0 ? "lime" : "blue"}>{stats.savings > 0 ? `ahorras ${money(stats.savings)}` : "en construcción"}</Badge></div><div className="receipt-paper">{cartItems.length === 0 ? <div className="empty-cart"><div className="empty-basket"><ShoppingBasket size={24} /></div><strong>Tu canasta está vacía</strong><span>Agrega productos del pasillo para empezar a calcular.</span></div> : <>{cartItems.map(([id, quantity]) => { const product = getProduct(id); const lineTotal = product.price * (1 - product.discount / 100) * quantity; return <div className="receipt-line" key={id}><div className="receipt-line-title"><span>{product.emoji}</span><div><strong>{product.name}</strong><small>{quantity} × {money(product.price * (1 - product.discount / 100))}</small></div></div><div className="receipt-line-actions"><strong>{money(lineTotal)}</strong><button onClick={() => removeProduct(id)} aria-label={`Quitar ${product.name}`}><Minus size={12} /></button></div></div> })}<div className="receipt-divider" /><div className="receipt-subline"><span>Precio sin descuentos</span><span>{money(stats.base)}</span></div><div className="receipt-subline savings"><span><Gift size={13} /> Ahorro inteligente</span><span>− {money(stats.savings)}</span></div><div className="receipt-total"><span>Total a pagar</span><strong>{money(stats.total)}</strong></div></>}</div><div className={`budget-meter ${remaining < 0 ? "over" : ""}`}><div className="meter-label"><span>Saldo restante</span><strong>{money(remaining)}</strong></div><div className="meter-track"><span style={{ width: `${Math.min((stats.total / budget) * 100, 100)}%` }} /></div></div><button className="primary-button full" disabled={!ready} onClick={onCheckout}>{ready ? "Pasar por caja" : stats.count < 3 ? `Agrega ${3 - stats.count} producto${3 - stats.count === 1 ? "" : "s"} más` : "Ajusta tu presupuesto"}<ArrowRight size={16} /></button>{stats.count > 0 && stats.savings === 0 && <p className="helper-line warn"><Lightbulb size={13} /> Busca una oferta para que tu decisión sea más inteligente.</p>}</aside>
+      <div className="aisle-panel"><div className="aisle-toolbar"><div><span className="tiny-label">Pasillo matemático</span><strong>{selectedTicket ? `¿Dónde usar ${discountTickets.find((ticket) => ticket.id === selectedTicket)?.label}?` : "Elige tus productos"}</strong></div><div className="aisle-art"><img src={STICKERS} alt="Stickers ilustrados de alimentos" /></div></div><div className="product-grid">{products.map((product) => <ProductCard key={product.id} product={product} quantity={cart[product.id] ?? 0} appliedTicket={discountTickets.find((ticket) => ticket.id === assignedTickets[product.id])} selectedTicket={selectedTicket ? discountTickets.find((ticket) => ticket.id === selectedTicket) : undefined} onAdd={() => addProduct(product.id)} onDrop={(ticketId) => assignTicket(product.id, ticketId)} onApplySelected={() => selectedTicket && assignTicket(product.id, selectedTicket)} />)}</div></div>
+      <aside className="receipt-panel"><div className="receipt-head"><div className="receipt-title"><div className="receipt-icon"><ShoppingBasket size={17} /></div><div><strong>Tu canasta</strong><span>{stats.count} {stats.count === 1 ? "producto" : "productos"}</span></div></div><Badge tone={stats.savings > 0 ? "lime" : "blue"}>{stats.savings > 0 ? `ahorras ${money(stats.savings)}` : "aplica un ticket"}</Badge></div><div className="receipt-paper">{cartItems.length === 0 ? <div className="empty-cart"><div className="empty-basket"><ShoppingBasket size={24} /></div><strong>Tu canasta está vacía</strong><span>Agrega productos y reparte tus tickets de descuento.</span></div> : <>{cartItems.map(([id, quantity]) => { const product = getProduct(id); const ticket = discountTickets.find((item) => item.id === assignedTickets[id]); const lineTotal = product.price * (1 - (ticket?.percent ?? 0) / 100) * quantity; return <div className="receipt-line" key={id}><div className="receipt-line-title"><span>{product.emoji}</span><div><strong>{product.name}</strong><small>{quantity} × {money(lineTotal / quantity)}{ticket ? ` · ${ticket.label}` : " · sin ticket"}</small></div></div><div className="receipt-line-actions"><strong>{money(lineTotal)}</strong><button onClick={() => removeProduct(id)} aria-label={`Quitar ${product.name}`}><Minus size={12} /></button>{ticket && <button className="remove-ticket" onClick={() => removeTicket(id)} aria-label={`Quitar ticket de ${product.name}`}><X size={12} /></button>}</div></div> })}<div className="receipt-divider" /><div className="receipt-subline"><span>Precio sin descuentos</span><span>{money(stats.base)}</span></div><div className="receipt-subline savings"><span><Gift size={13} /> Ahorro inteligente</span><span>− {money(stats.savings)}</span></div><div className="receipt-total"><span>Total a pagar</span><strong>{money(stats.total)}</strong></div></>}</div><div className={`budget-meter ${remaining < 0 ? "over" : ""}`}><div className="meter-label"><span>Saldo restante</span><strong>{money(remaining)}</strong></div><div className="meter-track"><span style={{ width: `${Math.min((stats.total / budget) * 100, 100)}%` }} /></div></div><button className="primary-button full" disabled={!ready} onClick={onCheckout}>{ready ? "Pasar por caja" : stats.count < 3 ? `Agrega ${3 - stats.count} producto${3 - stats.count === 1 ? "" : "s"} más` : "Ajusta tu presupuesto"}<ArrowRight size={16} /></button>{stats.count > 0 && usedTicketIds.length === 0 && <p className="helper-line warn"><Lightbulb size={13} /> Reparte al menos un ticket para tomar una decisión inteligente.</p>}</aside>
     </div>
   </section>;
 }
-
 function Results({ cart, onRestart }: { cart: Cart; onRestart: () => void }) {
-  const stats = useMemo(() => Object.entries(cart).reduce((acc, [id, quantity]) => { const product = getProduct(id); const base = product.price * quantity; const total = product.price * (1 - product.discount / 100) * quantity; return { base: acc.base + base, total: acc.total + total, count: acc.count + quantity }; }, { base: 0, total: 0, count: 0 }), [cart]);
+  const stats = useMemo(() => Object.entries(cart).reduce((acc, [id, quantity]) => { const product = getProduct(id); const base = product.price * quantity; return { base: acc.base + base, total: acc.total + base, count: acc.count + quantity }; }, { base: 0, total: 0, count: 0 }), [cart]);
   const savings = stats.base - stats.total;
-  const grade = stats.count >= 4 && savings >= 4000 ? "Compra experta" : savings > 0 ? "Buena decisión" : "Primer intento";
-  const firstDiscounted = Object.entries(cart).find(([id, quantity]) => quantity > 0 && getProduct(id).discount > 0)?.[0] ?? Object.keys(cart)[0] ?? "queso";
+  const appliedExampleSavings = 2000;
+  const grade = stats.count >= 4 ? "Compra experta" : stats.count > 0 ? "Buena decisión" : "Primer intento";
+  const firstDiscounted = Object.keys(cart)[0] ?? "queso";
   const example = getProduct(firstDiscounted);
-  return <section className="phase-shell fade-in result-shell"><div className="result-hero"><div className="result-mark"><Trophy size={28} /></div><Badge tone="lime"><Sparkles size={13} /> Ticket de salida</Badge><h2>{grade}. <em>Tu decisión tiene sentido.</em></h2><p>Ahora puedes explicar no solo cuánto ahorraste, sino qué representa ese ahorro respecto al precio original.</p></div><div className="result-grid"><div className="result-score-card"><span className="tiny-label">Resumen de tu compra</span><div className="score-number">{money(savings)}</div><span className="score-label">ahorro total · {stats.count} productos</span><div className="score-bar"><span style={{ width: `${Math.min((savings / 5000) * 100, 100)}%` }} /></div><div className="score-foot"><span>Precio original <b>{money(stats.base)}</b></span><span>Total pagado <b>{money(stats.total)}</b></span></div></div><div className="reflection-card"><div className="reflection-head"><Brain size={18} /><strong>Tu explicación matemática</strong></div><p>En tu compra, un descuento de <strong>{example.discount}%</strong> significa que pagas el <strong>{100 - example.discount}%</strong> del precio: <strong>{100 - example.discount}% = {((100 - example.discount) / 100).toLocaleString("es-CO", { minimumFractionDigits: 2 })}</strong>.</p><div className="calculation-strip"><span>{money(example.price)}</span><ArrowRight size={15} /><span>{example.discount}% menos</span><ArrowRight size={15} /><strong>{money(example.price * (1 - example.discount / 100))}</strong></div><div className="reflection-choices"><span>¿Qué tipo de variación comunicaste?</span><div><Badge tone="blue">Absoluta: {money(example.price * example.discount / 100)}</Badge><Badge tone="orange">Relativa: {example.discount}%</Badge></div></div></div></div><div className="result-footer"><div><ClipboardCheck size={16} /><span>Comparte con tu pareja: ¿qué producto fue la mejor decisión y por qué?</span></div><button className="secondary-button" onClick={onRestart}><RotateCcw size={16} /> Volver a empezar</button></div></section>;
+  const exampleTicket = discountTickets[0];
+  return <section className="phase-shell fade-in result-shell"><div className="result-hero"><div className="result-mark"><Trophy size={28} /></div><Badge tone="lime"><Sparkles size={13} /> Ticket de salida</Badge><h2>{grade}. <em>Tu decisión tiene sentido.</em></h2><p>Ahora puedes explicar no solo cuánto ahorraste, sino qué representa ese ahorro respecto al precio original.</p></div><div className="result-grid"><div className="result-score-card"><span className="tiny-label">Resumen de tu compra</span><div className="score-number">{money(savings)}</div><span className="score-label">ahorro total · {stats.count} productos</span><div className="score-bar"><span style={{ width: `${Math.min((savings / 5000) * 100, 100)}%` }} /></div><div className="score-foot"><span>Precio original <b>{money(stats.base)}</b></span><span>Total pagado <b>{money(stats.total)}</b></span></div></div><div className="reflection-card"><div className="reflection-head"><Brain size={18} /><strong>Tu explicación matemática</strong></div><p>En tu compra, un ticket de <strong>{exampleTicket.label}</strong> significa que ahorras <strong>{exampleTicket.percent}%</strong> del precio: <strong>{exampleTicket.percent}% = {exampleTicket.kind === "fraction" ? "1/4" : "0,25"}</strong>.</p><div className="calculation-strip"><span>{money(example.price)}</span><ArrowRight size={15} /><span>{exampleTicket.label} menos</span><ArrowRight size={15} /><strong>{money(example.price - appliedExampleSavings)}</strong></div><div className="reflection-choices"><span>¿Qué tipo de variación comunicaste?</span><div><Badge tone="blue">Absoluta: {money(appliedExampleSavings)}</Badge><Badge tone="orange">Relativa: {exampleTicket.percent}%</Badge></div></div></div></div><div className="result-footer"><div><ClipboardCheck size={16} /><span>Comparte con tu pareja: ¿qué producto fue la mejor decisión y por qué?</span></div><button className="secondary-button" onClick={onRestart}><RotateCcw size={16} /> Volver a empezar</button></div></section>;
 }
 
 export default function Home() {
