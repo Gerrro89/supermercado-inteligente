@@ -76,3 +76,5 @@ h1 em, h2 em { font-style: normal; color: #e55334; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 
 @import "./ticket_styles.css";
+
+@import "./projection.css";

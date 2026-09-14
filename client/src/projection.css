@@ -1,0 +1,84 @@
+/* Modo proyección: prioriza lectura a distancia en pantallas grandes */
+@media (min-width: 1400px) {
+  .topbar, .app-main, .app-footer { max-width: 1540px; }
+  .topbar { padding: 32px 56px 28px; }
+  .app-main { padding: 34px 56px 58px; }
+  .brand-mark { width: 46px; height: 46px; border-radius: 14px; }
+  .brand-name { font-size: 22px; }
+  .brand-kicker { font-size: 11px; }
+  .pair-chip { font-size: 12px; padding: 11px 16px; }
+  .icon-button { width: 44px; height: 44px; }
+  .stepper { max-width: 620px; margin-bottom: 50px; }
+  .step-number { width: 31px; height: 31px; font-size: 11px; }
+  .step-label { font-size: 11px; }
+  .step-line { margin: 0 12px; }
+  .intro-layout { grid-template-columns: minmax(460px, .9fr) minmax(650px, 1.3fr); gap: 58px; padding: 45px 0 35px; }
+  .intro-copy { padding-left: 30px; }
+  .intro-copy h1 { font-size: clamp(68px, 5.4vw, 104px); }
+  .intro-lede { max-width: 600px; font-size: 20px; }
+  .primary-button { font-size: 15px; padding: 18px 22px; }
+  .time-note { font-size: 11px; }
+  .skill-row { gap: 34px; }
+  .skill-item { font-size: 14px; }
+  .skill-icon { width: 36px; height: 36px; }
+  .visual-caption { font-size: 12px; margin-bottom: 15px; }
+  .hero-image-frame { padding: 14px; box-shadow: 15px 15px 0 rgba(30,75,154,.11); }
+  .floating-sticker { width: 112px; height: 112px; }
+  .floating-sticker span { font-size: 32px; }
+  .floating-sticker small { font-size: 10px; }
+  .sticker-top { right: -33px; top: -34px; }
+  .sticker-bottom { left: -35px; bottom: -30px; }
+  .visual-footer { font-size: 11px; margin-top: 26px; }
+  .intro-side-note { max-width: 940px; padding: 20px 24px; }
+  .side-note-icon { width: 40px; height: 40px; }
+  .intro-side-note strong { font-size: 13px; }
+  .intro-side-note p { font-size: 14px; }
+  .phase-heading h2 { font-size: clamp(48px, 4vw, 72px); }
+  .phase-heading p { font-size: 17px; }
+  .phase-shell { padding-top: 35px; }
+  .phase-time { font-size: 12px; }
+  .offer-card, .math-card { padding: 38px; }
+  .offer-product h3, .math-card h3 { font-size: 32px; }
+  .offer-product { gap: 24px; margin: 38px 0 25px; }
+  .product-orb { width: 126px; height: 126px; font-size: 67px; }
+  .price-shift strong { font-size: 30px; }
+  .relation-board strong { font-size: 28px; }
+  .equivalence-line { font-size: 24px; margin: 17px 0 32px; }
+  .estimate-card { padding: 17px 10px; }
+  .estimate-card strong { font-size: 14px; }
+  .estimate-card small { font-size: 11px; }
+  .ticket-tray { padding: 19px 23px; gap: 30px; }
+  .ticket-tray-title strong { font-size: 15px; }
+  .ticket-tray-title span, .ticket-helper { font-size: 10px; }
+  .discount-ticket { min-width: 185px; padding: 11px 14px 11px 18px; }
+  .ticket-main b { font-size: 24px; }
+  .ticket-main small, .ticket-copy, .ticket-used { font-size: 10px; }
+  .aisle-panel { padding: 23px; }
+  .aisle-toolbar strong { font-size: 25px; }
+  .product-card { padding: 17px; }
+  .product-emoji { width: 68px; height: 68px; font-size: 38px; }
+  .product-card h3 { font-size: 16px; min-height: 36px; }
+  .product-price { font-size: 19px; }
+  .product-equivalence { font-size: 10px; }
+  .receipt-panel { padding: 25px; }
+  .receipt-title strong { font-size: 18px; }
+  .receipt-paper { padding: 23px 19px; }
+  .receipt-line strong { font-size: 12px; }
+  .receipt-line small { font-size: 10px; }
+  .receipt-total { font-size: 14px; }
+  .receipt-total strong { font-size: 25px; }
+  .result-hero h2 { font-size: clamp(48px, 4vw, 72px); }
+  .result-hero p { font-size: 17px; }
+  .result-score-card, .reflection-card { padding: 34px; }
+  .score-number { font-size: 56px; }
+  .reflection-card p { font-size: 16px; }
+  .result-footer > div { font-size: 14px; }
+  .app-footer { padding: 21px 56px 29px; font-size: 11px; }
+}
+
+@media (min-width: 1800px) {
+  .topbar, .app-main, .app-footer { max-width: 1680px; }
+  .intro-layout { grid-template-columns: minmax(530px, .82fr) minmax(760px, 1.3fr); gap: 75px; }
+  .intro-copy h1 { font-size: 112px; }
+  .hero-image-frame img { max-height: 590px; }
+}
