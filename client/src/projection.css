@@ -55,6 +55,7 @@
   .ticket-main small, .ticket-copy, .ticket-used { font-size: 10px; }
   .aisle-panel { padding: 23px; }
   .aisle-toolbar strong { font-size: 25px; }
+  .product-grid { grid-template-columns: repeat(4, 1fr); }
   .product-card { padding: 17px; }
   .product-emoji { width: 68px; height: 68px; font-size: 38px; }
   .product-card h3 { font-size: 16px; min-height: 36px; }

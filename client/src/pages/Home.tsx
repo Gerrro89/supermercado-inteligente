@@ -59,6 +59,12 @@ const products: Product[] = [
   { id: "cereal", name: "Cereal de colores", category: "Despensa", price: 9500, color: "orange", emoji: "🥣", accent: "#ef9b3e" },
   { id: "jugo", name: "Jugo de naranja", category: "Bebidas", price: 5000, color: "lime", emoji: "🍊", accent: "#9fc437" },
   { id: "pan", name: "Pan artesanal", category: "Panadería", price: 3500, color: "yellow", emoji: "🥖", accent: "#df9a3b" },
+  { id: "yogur", name: "Yogur de fresa", category: "Lácteos", price: 5500, color: "red", emoji: "🍓", accent: "#ef7d87" },
+  { id: "bananos", name: "Bananos maduros", category: "Frutas", price: 4000, color: "yellow", emoji: "🍌", accent: "#e8c84b" },
+  { id: "arroz", name: "Arroz integral", category: "Despensa", price: 7200, color: "orange", emoji: "🍚", accent: "#d5a76c" },
+  { id: "agua", name: "Agua mineral", category: "Bebidas", price: 2800, color: "sky", emoji: "💧", accent: "#64b7df" },
+  { id: "galletas", name: "Galletas de avena", category: "Despensa", price: 6200, color: "blue", emoji: "🍪", accent: "#c89052" },
+  { id: "tomates", name: "Tomates frescos", category: "Frutas", price: 4800, color: "red", emoji: "🍅", accent: "#e35b45" },
 ];
 
 const discountTickets: DiscountTicket[] = [
@@ -66,6 +72,10 @@ const discountTickets: DiscountTicket[] = [
   { id: "frac14", label: "1/4", percent: 25, kind: "fraction", detail: "25% de descuento", accent: "#1e4b9a" },
   { id: "pct10", label: "10%", percent: 10, kind: "percentage", detail: "una décima parte", accent: "#6caec0" },
   { id: "frac15", label: "1/5", percent: 20, kind: "fraction", detail: "20% de descuento", accent: "#8aa82e" },
+  { id: "pct50", label: "50%", percent: 50, kind: "percentage", detail: "la mitad", accent: "#9a56a8" },
+  { id: "frac12", label: "1/2", percent: 50, kind: "fraction", detail: "50% de descuento", accent: "#75428d" },
+  { id: "pct30", label: "30%", percent: 30, kind: "percentage", detail: "tres décimas", accent: "#d47732" },
+  { id: "frac310", label: "3/10", percent: 30, kind: "fraction", detail: "30% de descuento", accent: "#bd692c" },
 ];
 
 const money = (value: number) => `$${Math.round(value).toLocaleString("es-CO")}`;
